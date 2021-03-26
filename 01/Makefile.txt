@@ -1,8 +1,0 @@
-CC=g++
-FLAGS=-std=c++17 -Wall -Werror -Wextra -Wno-unused-variable
-all: my_prog
-my_prog: homework.cpp
-	$(CC) $(FLAGS) -c homework.cpp
-test:
-clean:
-	rm -rf *.o my_prog
