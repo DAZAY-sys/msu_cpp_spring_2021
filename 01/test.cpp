@@ -1,60 +1,65 @@
-# include "allocator.hpp"
-# include <iostream>
-
-    Allocator first;
-    first.makeAllocator(15);
-    first.alloc(6);
-    first.alloc(10);
-    first.alloc(10);
-    first.reset();
-    first.alloc(20);
-    first.alloc(10);
-    first.alloc(6);
-    
-    first.alloc(20);
-    first.alloc(10);
+#include "allocator.hpp"
+#include <cassert> 
 
 void DefaultWorkTest()
 {
     Allocator al;
     al.makeAllocator(15);
-    al.alloc(10);
-    al.alloc(2);
-    al.alloc(3);
+    char* ptr1 = al.alloc(10);
+    char* ptr2 = al.alloc(5);
+
+    assert(ptr2 - ptr1 == 5);
 }
 
 void ResetTest()
 {
     Allocator al;
     al.makeAllocator(15);
-    // al.alloc(10);
+    char* ptr1 = al.alloc(10);
     al.reset();
-    al.alloc(15);
+    char* ptr2 = al.alloc(15);
+
+    assert(ptr2 - ptr1 == 5);
 }
 
 void OutOfSpaceTest()
 {
     Allocator al;
     al.makeAllocator(15);
-    al.alloc(16);
+    char* ptr1 = al.alloc(16);
+
+    assert(ptr1 == nullptr);
 }
 
-void MakeAllocatorTwice()
+void MakeAllocatorTwiceTest()
 {
     Allocator al;
     al.makeAllocator(2);
     al.makeAllocator(10);
-    al.alloc(6);
+    char* ptr1 = al.alloc(6);
+    char* ptr2 = al.alloc(2);
+
+    assert(ptr2 - ptr1 == 2);
+    
 }
 
+void OutOfMemoryTest()
+{
+    Allocator al;
+    al.makeAllocator(150000000000);
+    char* ptr1 = al.alloc(16);
+
+    assert(ptr1 == nullptr);
+}
 
 int main()
 {
     DefaultWorkTest();
     ResetTest();
     OutOfSpaceTest();
-    MakeAllocatorTwice();
-
+    MakeAllocatorTwiceTest();
+    OutOfMemoryTest();
+    
     std::cout << "SUCCESS\n";
 
     return 0;

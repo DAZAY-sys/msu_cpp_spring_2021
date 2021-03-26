@@ -1,4 +1,5 @@
 #pragma once
+#include <iostream>
 
 class Allocator
 {
@@ -13,35 +14,36 @@ public:
         delete[] data;
     }
 
-    void makeAllocator (size_t maxSize) {
-        if (data) {
+    void makeAllocator (std::size_t maxSize) {
+        if (data)
             delete[] data;
-            std::cout << "NOT NULL\n";
+    
+        try {
+            data = new char[maxSize];
+            this->maxSize = maxSize;
+            occupiedSize = 0;
         }
-        data = new char[maxSize];
-        this->maxSize = maxSize;
-        occupiedSize = 0;
+        catch(std::bad_alloc) {
+            this->maxSize = 0;
+        }
     }
 
-    char* alloc(size_t size) {
-        if (occupiedSize+size <= maxSize) {
+    char* alloc(std::size_t size) {
+        if (occupiedSize + size <= maxSize) {
             occupiedSize += size;
             char * r = data + occupiedSize;
-            std::cout << "MOVED SUCCESS\n";
             return r;
         } else {
-            std::cout << "NO MORE PLACE\n";
             return nullptr;
-        }
+          }
     }
 
     void reset() {
-        std::cout << "RESETING ALL\n";
         occupiedSize = 0;
     }
 
 private:
     char* data;
-    size_t maxSize;
-    size_t occupiedSize;
+    std::size_t maxSize;
+    std::size_t occupiedSize;
 };
