@@ -8,7 +8,7 @@ void DefaultWorkTest()
     char* ptr1 = al.alloc(10);
     char* ptr2 = al.alloc(5);
 
-    assert(ptr2 - ptr1 == 5);
+    assert(ptr2 - ptr1 == 10);
 }
 
 void ResetTest()
@@ -19,7 +19,7 @@ void ResetTest()
     al.reset();
     char* ptr2 = al.alloc(15);
 
-    assert(ptr2 - ptr1 == 5);
+    assert(ptr2 == ptr1);
 }
 
 void OutOfSpaceTest()
@@ -39,7 +39,7 @@ void MakeAllocatorTwiceTest()
     char* ptr1 = al.alloc(6);
     char* ptr2 = al.alloc(2);
 
-    assert(ptr2 - ptr1 == 2);
+    assert(ptr2 - ptr1 == 6);
     
 }
 

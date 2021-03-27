@@ -30,8 +30,8 @@ public:
 
     char* alloc(std::size_t size) {
         if (occupiedSize + size <= maxSize) {
-            occupiedSize += size;
             char * r = data + occupiedSize;
+            occupiedSize += size;
             return r;
         } else {
             return nullptr;
