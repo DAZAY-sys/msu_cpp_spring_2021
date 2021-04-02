@@ -2,6 +2,8 @@
 #include <iostream>
 #include <vector>
 
+const uint64_t MAXSIZE = std::numeric_limits<uint64_t>::max();
+
 class TokenParser
 {
 public:
@@ -10,14 +12,14 @@ public:
 
     void SetStartCallback(void (*func)());
     void SetEndCallback(void (*func)());
-    void SetDigitTokenCallback(void (*DigitCallBack)(int x));
+    void SetDigitTokenCallback(void (*DigitCallBack)(uint64_t x));
     void SetWordTokenCallback(void (*CallBack)(std::string x));
     void CallStartCallback();
     void CallEndCallback();
     const std::vector<std::string> Parser(const std::string &line);
 
 private:
-    void (*digitCallback)(int x);
+    void (*digitCallback)(uint64_t x);
     void (*wordCallback)(std::string x);
     void (*startF)();
     void (*endF)();

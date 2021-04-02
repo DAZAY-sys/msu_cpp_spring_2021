@@ -1,5 +1,8 @@
 #include "parser.hpp"
 #include <cassert>
+#include <cstdint>
+#include <cmath>
+#include <limits>
 
 void StartF()
 {
@@ -11,7 +14,7 @@ void EndF()
     std::cout << "END\n";
 }
 
-void Digit(int a)
+void Digit(uint64_t a)
 {
     std::cout << "Digit found - " << a << std::endl;
 }
@@ -101,6 +104,24 @@ void EmptyWordTest()
     assert(token.size() == 0);
 }
 
+void BigNumberTest()
+{
+    std::string line = "18446744073709551616\n18446744073709551615";
+    TokenParser token_par;
+
+    token_par.SetStartCallback(StartF);
+    token_par.SetEndCallback(EndF);
+    token_par.SetDigitTokenCallback(Digit);
+    token_par.SetWordTokenCallback(Word);
+
+    token_par.CallStartCallback();
+    const std::vector<std::string> token = token_par.Parser(line);
+    token_par.CallEndCallback();
+
+    assert(token[0] == "18446744073709551616");
+    assert(token[1] == "18446744073709551615");
+}
+
 int main()
 {
 //   Цикл для чтения напрямую, на тестах буду просто подавать строки
@@ -126,5 +147,9 @@ int main()
     EmptyWordTest();
     std::cout <<std::endl;
 
-    std::cout<<"SUCCESS";
+    std::cout << "Test BigNumberTest:"<<std::endl;
+    BigNumberTest();
+    std::cout <<std::endl;
+
+    std::cout<<"SUCCESS"<<std::endl;
 }
