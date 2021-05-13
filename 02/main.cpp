@@ -4,6 +4,7 @@
 #include <cmath>
 #include <limits>
 
+
 void StartF()
 {
     std::cout << "START\n";
@@ -34,14 +35,11 @@ void DefaultWorkTest()
     token_par.SetDigitTokenCallback(Digit);
     token_par.SetWordTokenCallback(Word);
 
-    token_par.CallStartCallback();
-    const std::vector<std::string> token = token_par.Parser(line);
-    token_par.CallEndCallback();
+    token_par.Parser(line);
 
-    assert(token[0] == "on_e");
-    assert(token[1] == "two");
-    assert(token[2] == "three3");
-    assert(token[3] == "1234");
+    assert(token_par.words[0] == "two");
+    assert(token_par.words[1] == "three3");
+    assert(token_par.numbers[0] == 1234);
 }
 
 void NoSetFunctionsTest()
@@ -49,12 +47,11 @@ void NoSetFunctionsTest()
     std::string line = "on_e\n   two  \vthree3\t1234 ";
     TokenParser token_par;
 
-    const std::vector<std::string> token = token_par.Parser(line);
+    token_par.Parser(line);
 
-    assert(token[0] == "on_e");
-    assert(token[1] == "two");
-    assert(token[2] == "three3");
-    assert(token[3] == "1234");
+    assert(token_par.words[0] == "two");
+    assert(token_par.words[1] == "three3");
+    assert(token_par.numbers[0] == 1234);
 }
 
 void PartSetFunctionsTest()
@@ -65,13 +62,11 @@ void PartSetFunctionsTest()
     token_par.SetEndCallback(EndF);
     token_par.SetDigitTokenCallback(Digit);
 
-    const std::vector<std::string> token = token_par.Parser(line);
-    token_par.CallEndCallback();
+    token_par.Parser(line);
 
-    assert(token[0] == "one");
-    assert(token[1] == "128");
-    assert(token[2] == "/");
-    assert(token[3] == "1234");
+    assert(token_par.words[0] == "one");
+    assert(token_par.numbers[0] == 128);
+    assert(token_par.numbers[1] == 1234);
 }
 
 void CallWithoutSetTest()
@@ -79,12 +74,10 @@ void CallWithoutSetTest()
     std::string line = "12 \r";
     TokenParser token_par;
 
-    token_par.CallStartCallback();
-    const std::vector<std::string> token = token_par.Parser(line);
-    token_par.CallEndCallback();
+    token_par.Parser(line);
 
-    assert(token[0] == "12");
-    assert(token[1] == "\r");
+    assert(token_par.numbers[0] == 12);
+    assert(token_par.words.size() == 0);
 }
 
 void EmptyWordTest()
@@ -97,11 +90,10 @@ void EmptyWordTest()
     token_par.SetDigitTokenCallback(Digit);
     token_par.SetWordTokenCallback(Word);
 
-    token_par.CallStartCallback();
-    const std::vector<std::string> token = token_par.Parser(line);
-    token_par.CallEndCallback();
+    token_par.Parser(line);
 
-    assert(token.size() == 0);
+    assert(token_par.words.size() == 0);
+    assert(token_par.numbers.size() == 0);
 }
 
 void BigNumberTest()
@@ -114,19 +106,41 @@ void BigNumberTest()
     token_par.SetDigitTokenCallback(Digit);
     token_par.SetWordTokenCallback(Word);
 
-    token_par.CallStartCallback();
-    const std::vector<std::string> token = token_par.Parser(line);
-    token_par.CallEndCallback();
+    token_par.Parser(line);
 
-    assert(token[0] == "18446744073709551616");
-    assert(token[1] == "18446744073709551615");
+    assert(token_par.words[0] == "18446744073709551616");
+    assert(token_par.numbers[0] == 18446744073709551615ULL);
+}
+
+void NullTest()
+{
+    std::string line1 = "";
+    std::string line2 = "0 1";
+    std::string line3 = "q";
+
+    TokenParser token_par;
+
+    token_par.SetStartCallback(StartF);
+    token_par.SetEndCallback(EndF);
+    token_par.SetDigitTokenCallback(Digit);
+    token_par.SetWordTokenCallback(Word);
+
+    token_par.Parser(line1);
+    assert(token_par.numbers.size() == 0);
+    assert(token_par.words.size() == 0);
+
+    token_par.Parser(line2);
+    assert(token_par.numbers[0] == 0);
+    assert(token_par.numbers[1] == 1);
+    assert(token_par.words.size() == 0);
+
+    token_par.Parser(line3);
+    assert(token_par.words[0] == "q");
+    assert(token_par.numbers.size() == 0);
 }
 
 int main()
 {
-//   Цикл для чтения напрямую, на тестах буду просто подавать строки
-//   while(getline(std::cin, line))
-
     std::cout << "Test DefaultWorkTest:"<<std::endl;
     DefaultWorkTest();
     std::cout <<std::endl;
@@ -149,6 +163,10 @@ int main()
 
     std::cout << "Test BigNumberTest:"<<std::endl;
     BigNumberTest();
+    std::cout <<std::endl;
+
+    std::cout << "Test NullTest:"<<std::endl;
+    NullTest();
     std::cout <<std::endl;
 
     std::cout<<"SUCCESS"<<std::endl;

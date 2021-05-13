@@ -21,29 +21,34 @@ void TokenParser::CallEndCallback()
         this->endF();
 }
 
-void TokenParser::SetDigitTokenCallback(void (*callback)(uint64_t x))
+void TokenParser::SetDigitTokenCallback(TypeInt callback)
 {
     this->digitCallback = callback;
 }
 
-void TokenParser::SetWordTokenCallback(void (*callback)(std::string x))
+void TokenParser::SetWordTokenCallback(TypeWord callback)
 {
     this->wordCallback = callback;
 }
 
-void TokenParser::SetStartCallback(void (*startF)())
+void TokenParser::SetStartCallback(TypeBegin startF)
 {
     this->startF = startF;
 }
 
-void TokenParser::SetEndCallback(void (*endF)())
+void TokenParser::SetEndCallback(TypeBegin endF)
 {
     this->endF = endF;
 }
 
-const std::vector<std::string> TokenParser::Parser(const std::string &line)
+void TokenParser::Parser(const std::string &line)
 {
+    CallStartCallback();
     std::vector<std::string> tokens;
+
+    this->words.clear();
+    this->numbers.clear();
+
     size_t pos = 0, lastPos = 0;
     std::string word;
 
@@ -60,16 +65,8 @@ const std::vector<std::string> TokenParser::Parser(const std::string &line)
         tokens.push_back(word);
 
     TokenParser::CheckTokensAndCall(tokens);
-    return tokens;
+    CallEndCallback();
 }
-
-
-     
-//     std::cout<<max_unsigned_int_size<<std::endl;
-
-//    uint64_t a = std::stoull("18446744073709551615");
-
-
 
 void TokenParser::CheckTokensAndCall(const std::vector<std::string> &tokens)
 {
@@ -83,8 +80,9 @@ void TokenParser::CheckTokensAndCall(const std::vector<std::string> &tokens)
 
         if (std::find_if(std::begin(tokens[i]), std::end(tokens[i]),
                 dig_check) == std::end(tokens[i])) {
-            try { 
-                number = std::stoull(tokens[i]); 
+            try {
+                number = std::stoull(tokens[i]);
+                this->numbers.push_back(number);
 
                 if (this->digitCallback != nullptr)
                     this->digitCallback(number);
@@ -95,6 +93,7 @@ void TokenParser::CheckTokensAndCall(const std::vector<std::string> &tokens)
 
         if (!move_done and std::find_if(std::begin(tokens[i]), std::end(tokens[i]),
                 word_check) == std::end(tokens[i])) {
+            this->words.push_back(tokens[i]);
             if (this->wordCallback != nullptr)
                 this->wordCallback(tokens[i]);
         }

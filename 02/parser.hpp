@@ -7,21 +7,27 @@ const uint64_t MAXSIZE = std::numeric_limits<uint64_t>::max();
 class TokenParser
 {
 public:
+    using TypeBegin = void(*)();
+    using TypeInt = void(*)(uint64_t);
+    using TypeWord = void(*)(std::string);
+
+    std::vector<std::string> words;
+    std::vector<uint64_t> numbers;
+
     TokenParser();
     ~TokenParser() = default;
 
-    void SetStartCallback(void (*func)());
-    void SetEndCallback(void (*func)());
-    void SetDigitTokenCallback(void (*DigitCallBack)(uint64_t x));
-    void SetWordTokenCallback(void (*CallBack)(std::string x));
+    void SetStartCallback(TypeBegin ptr);
+    void SetEndCallback(TypeBegin ptr);
+    void SetDigitTokenCallback(TypeInt ptr);
+    void SetWordTokenCallback(TypeWord ptr);
     void CallStartCallback();
     void CallEndCallback();
-    const std::vector<std::string> Parser(const std::string &line);
+    void Parser(const std::string &line);
 
 private:
-    void (*digitCallback)(uint64_t x);
-    void (*wordCallback)(std::string x);
-    void (*startF)();
-    void (*endF)();
+    TypeInt digitCallback;
+    TypeWord wordCallback;
+    TypeBegin startF,endF;
     void CheckTokensAndCall(const std::vector<std::string> &tokens);
 };
