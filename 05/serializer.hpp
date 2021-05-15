@@ -25,7 +25,10 @@ class Serializer
     static constexpr char Separator = ' ';
     std::ostream out_;
 public:
-    explicit Serializer(std::ostream& out) : out_(out.rdbuf()) {}
+    std::string string_out;
+    explicit Serializer(std::ostream& out) : out_(out.rdbuf()) {
+        string_out.clear();
+    }
 
     template <class T>
     Error save(T& object);
@@ -44,9 +47,14 @@ private:
 
 class Deserializer
 {
+    static constexpr char Separator = ' ';
     std::istream in_;
+
     public:
-    explicit Deserializer(std::istream& in): in_(in.rdbuf()) {}
+    std::string string_in;
+    explicit Deserializer(std::istream& in): in_(in.rdbuf()) {
+        string_in.clear();
+    }
 
     template <class T>
     Error load(T& object);

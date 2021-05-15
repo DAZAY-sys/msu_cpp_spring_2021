@@ -41,53 +41,131 @@ struct Data3
 
 void DefaultTest()
 {
-    Data x { 1, true, 2 }, y {0, false, 0};
+    Data x { 1, true, 2 }, y { 0, false, 0 };
     std::stringstream stream;
 
     Serializer serializer(stream);
-    serializer.save(x);
+    const Error err_s = serializer.save(x);
+
+    assert(err_s == Error::NoError);
+    assert(serializer.string_out == "1 true 2");
 
     Deserializer deserializer(stream);
-    const Error err = deserializer.load(y);
+    const Error err_d = deserializer.load(y);
 
-    assert(err == Error::NoError);
+    assert(err_d == Error::NoError);
+    assert(deserializer.string_in == "1 true 2");
+
     assert(x.a == y.a);
     assert(x.b == y.b);
     assert(x.c == y.c);
 }
 
+void DefaultTestTwoDim()
+{
+    Data3 x {18446744073709551615ULL, true}, y {0, false};
+
+    std::stringstream stream;
+    Serializer serializer(stream);
+    const Error err_s = serializer.save(x);
+
+    assert(err_s == Error::NoError);
+    assert(serializer.string_out == "18446744073709551615 true");
+
+    Deserializer deserializer(stream);
+    const Error err_d = deserializer.load(y);
+
+    assert(err_d == Error::NoError);
+    assert(deserializer.string_in == "18446744073709551615 true");
+
+    assert(x.a == y.a);
+    assert(x.b == y.b);
+}
+
+void BoolType()
+{
+    Data3 x {0, 1}, y {0, false};
+
+    std::stringstream stream;
+    Serializer serializer(stream);
+    const Error err_s = serializer.save(x);
+
+    assert(err_s == Error::NoError);
+    assert(serializer.string_out == "0 true");
+
+    Deserializer deserializer(stream);
+    const Error err_d = deserializer.load(y);
+
+    assert(err_d == Error::NoError);
+    assert(deserializer.string_in == "0 true");
+
+    assert(x.a == y.a);
+    assert(x.b == y.b);
+}
+
 void ErrorTest()
 {
-    Data x { 1, true, 2 };
-    Data2 y {"str", false, 2};
+    Data x {1, true, 2};
+    Data2 y {"str", false, 5};
     std::stringstream stream;
 
     Serializer serializer(stream);
-    serializer.save(x);
+    const Error err_s = serializer.save(x);
+
+    assert(err_s == Error::NoError);
+    assert(serializer.string_out == "1 true 2");
 
     Deserializer deserializer(stream);
-    const Error err = deserializer.load(y);
+    const Error err_d = deserializer.load(y);
 
-    assert(err == Error::CorruptedArchive);
-    assert(x.b != y.b);
-    assert(x.c == y.c);
+    assert(err_d == Error::CorruptedArchive);
+    assert(deserializer.string_in == "");
 }
 
-void WrongDimension()
+void WrongDimensionMore()
 {
     Data x {1, true, 2};
     Data3 y {0, false};
     std::stringstream stream;
 
     Serializer serializer(stream);
-    serializer.save(x);
+    const Error err_s = serializer.save(x);
+
+    assert(err_s == Error::NoError);
+    assert(serializer.string_out == "1 true 2");
 
     Deserializer deserializer(stream);
-    const Error err = deserializer.load(y);
+    const Error err_d = deserializer.load(y);
 
-    assert(err == Error::CorruptedArchive);
+    assert(err_d == Error::CorruptedArchive);
+    assert(deserializer.string_in == "1 true");
+
     assert(x.a == y.a);
     assert(x.b == y.b);
+}
+
+void WrongDimensionLess()
+{
+    Data3 x {0, false};
+    Data y {1, true, 2};
+
+    std::stringstream stream;
+
+    Serializer serializer(stream);
+    const Error err_s = serializer.save(x);
+
+    assert(err_s == Error::NoError);
+    assert(serializer.string_out == "0 false");
+
+    Deserializer deserializer(stream);
+    const Error err_d = deserializer.load(y);
+
+    assert(err_d == Error::CorruptedArchive);
+    assert(deserializer.string_in == "0 false");
+
+    assert(x.a == y.a);
+    assert(x.b == y.b);
+    assert(y.c == 2);
 }
 
 void ReadFromEmptyStream()
@@ -96,9 +174,11 @@ void ReadFromEmptyStream()
     std::stringstream stream;
 
     Deserializer deserializer(stream);
-    const Error err = deserializer.load(y);
+    const Error err_d = deserializer.load(y);
 
-    assert(err == Error::CorruptedArchive);
+    assert(err_d == Error::CorruptedArchive);
+    assert(deserializer.string_in == "");
+
     assert(y.a == 0);
     assert(y.b == false);
     assert(y.c == 1);
@@ -107,8 +187,11 @@ void ReadFromEmptyStream()
 int main()
 {
     DefaultTest();
+    DefaultTestTwoDim();
     ErrorTest();
-    WrongDimension();
+    BoolType();
+    WrongDimensionMore();
+    WrongDimensionLess();
     ReadFromEmptyStream();
 
     std::cout << "SUCCESS\n";
