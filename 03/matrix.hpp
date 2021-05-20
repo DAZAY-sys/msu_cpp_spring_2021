@@ -11,19 +11,19 @@ class Matrix
 
     public:
         int32_t *data;
-        Proxy(size_t b);
+        Proxy(size_t b = 0);
         ~Proxy();
         int32_t& operator[](size_t j);
         void operator =(Proxy p);
     };
 
 public:
-    Matrix(size_t a, size_t b);
+    Matrix(size_t a = 0, size_t b = 0);
     ~Matrix();
-    size_t getRows();
-    size_t getColumns();
+    size_t getRows() const;
+    size_t getColumns() const;
 
-    void operator *=(uint32_t n);
+    Matrix& operator *=(uint32_t n);
     Proxy& operator[](size_t i);
 
     friend std::ostream& operator<<(std::ostream &out, Matrix &m);
