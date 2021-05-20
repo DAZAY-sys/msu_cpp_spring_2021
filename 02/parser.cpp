@@ -46,9 +46,6 @@ void TokenParser::Parser(const std::string &line)
     CallStartCallback();
     std::vector<std::string> tokens;
 
-    this->words.clear();
-    this->numbers.clear();
-
     size_t pos = 0, lastPos = 0;
     std::string word;
 
@@ -71,7 +68,6 @@ void TokenParser::Parser(const std::string &line)
 void TokenParser::CheckTokensAndCall(const std::vector<std::string> &tokens)
 {
     auto dig_check = [](unsigned char c) { return !std::isdigit(c); };
-    auto word_check = [](unsigned char c) { return !(std::isdigit(c) || std::isalpha(c)); };
     bool move_done;
     uint64_t number;
 
@@ -82,8 +78,6 @@ void TokenParser::CheckTokensAndCall(const std::vector<std::string> &tokens)
                 dig_check) == std::end(tokens[i])) {
             try {
                 number = std::stoull(tokens[i]);
-                this->numbers.push_back(number);
-
                 if (this->digitCallback != nullptr)
                     this->digitCallback(number);
                 move_done = true;
@@ -91,9 +85,7 @@ void TokenParser::CheckTokensAndCall(const std::vector<std::string> &tokens)
             catch (std::out_of_range) {}
         }
 
-        if (!move_done and std::find_if(std::begin(tokens[i]), std::end(tokens[i]),
-                word_check) == std::end(tokens[i])) {
-            this->words.push_back(tokens[i]);
+        if (!move_done ) {
             if (this->wordCallback != nullptr)
                 this->wordCallback(tokens[i]);
         }

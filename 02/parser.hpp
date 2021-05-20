@@ -11,9 +11,6 @@ public:
     using TypeInt = void(*)(uint64_t);
     using TypeWord = void(*)(std::string);
 
-    std::vector<std::string> words;
-    std::vector<uint64_t> numbers;
-
     TokenParser();
     ~TokenParser() = default;
 

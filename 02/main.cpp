@@ -4,6 +4,8 @@
 #include <cmath>
 #include <limits>
 
+std::vector<std::string> words;
+std::vector<uint64_t> numbers;
 
 void StartF()
 {
@@ -17,17 +19,22 @@ void EndF()
 
 void Digit(uint64_t a)
 {
+    numbers.push_back(a);
     std::cout << "Digit found - " << a << std::endl;
 }
 
 void Word(std::string a)
 {
+    words.push_back(a);
     std::cout << "Word found - " << a << std::endl;
 }
 
 void DefaultWorkTest()
 {
-    std::string line = "on_e\ntwo\vthree3\t1234 ";
+    numbers.clear();
+    words.clear();
+
+    std::string line = "on_e\ntwo\vthree32chh\t1234 ";
     TokenParser token_par;
 
     token_par.SetStartCallback(StartF);
@@ -37,25 +44,31 @@ void DefaultWorkTest()
 
     token_par.Parser(line);
 
-    assert(token_par.words[0] == "two");
-    assert(token_par.words[1] == "three3");
-    assert(token_par.numbers[0] == 1234);
+    assert(words[0] == "on_e");
+    assert(words[1] == "two");
+    assert(words[2] == "three32chh");
+    assert(numbers[0] == 1234);
 }
 
 void NoSetFunctionsTest()
 {
-    std::string line = "on_e\n   two  \vthree3\t1234 ";
+    numbers.clear();
+    words.clear();
+
+    std::string line = "on_e\n   two  \vthree3ch\t1234 ";
     TokenParser token_par;
 
     token_par.Parser(line);
 
-    assert(token_par.words[0] == "two");
-    assert(token_par.words[1] == "three3");
-    assert(token_par.numbers[0] == 1234);
+    assert(words.size() == 0);
+    assert(numbers.size() == 0);
 }
 
 void PartSetFunctionsTest()
 {
+    numbers.clear();
+    words.clear();
+
     TokenParser token_par;
     std::string line = "one\n128\v\v\t  /\t1234 ";
 
@@ -64,24 +77,16 @@ void PartSetFunctionsTest()
 
     token_par.Parser(line);
 
-    assert(token_par.words[0] == "one");
-    assert(token_par.numbers[0] == 128);
-    assert(token_par.numbers[1] == 1234);
-}
-
-void CallWithoutSetTest()
-{
-    std::string line = "12 \r";
-    TokenParser token_par;
-
-    token_par.Parser(line);
-
-    assert(token_par.numbers[0] == 12);
-    assert(token_par.words.size() == 0);
+    assert(words.size() == 0);
+    assert(numbers[0] == 128);
+    assert(numbers[1] == 1234);
 }
 
 void EmptyWordTest()
 {
+    numbers.clear();
+    words.clear();
+
     std::string line = "\n\t  \v \n";
     TokenParser token_par;
 
@@ -92,12 +97,15 @@ void EmptyWordTest()
 
     token_par.Parser(line);
 
-    assert(token_par.words.size() == 0);
-    assert(token_par.numbers.size() == 0);
+    assert(words.size() == 0);
+    assert(numbers.size() == 0);
 }
 
 void BigNumberTest()
 {
+    numbers.clear();
+    words.clear();
+
     std::string line = "18446744073709551616\n18446744073709551615";
     TokenParser token_par;
 
@@ -108,15 +116,18 @@ void BigNumberTest()
 
     token_par.Parser(line);
 
-    assert(token_par.words[0] == "18446744073709551616");
-    assert(token_par.numbers[0] == 18446744073709551615ULL);
+    assert(words[0] == "18446744073709551616");
+    assert(numbers[0] == 18446744073709551615ULL);
 }
 
 void NullTest()
 {
+    numbers.clear();
+    words.clear();
+
     std::string line1 = "";
-    std::string line2 = "0 1";
-    std::string line3 = "q";
+    std::string line2 = "1";
+    std::string line3 = "!";
 
     TokenParser token_par;
 
@@ -126,17 +137,22 @@ void NullTest()
     token_par.SetWordTokenCallback(Word);
 
     token_par.Parser(line1);
-    assert(token_par.numbers.size() == 0);
-    assert(token_par.words.size() == 0);
+    assert(numbers.size() == 0);
+    assert(words.size() == 0);
+
+    numbers.clear();
+    words.clear();
 
     token_par.Parser(line2);
-    assert(token_par.numbers[0] == 0);
-    assert(token_par.numbers[1] == 1);
-    assert(token_par.words.size() == 0);
+    assert(numbers[0] == 1);
+    assert(words.size() == 0);
+
+    numbers.clear();
+    words.clear();
 
     token_par.Parser(line3);
-    assert(token_par.words[0] == "q");
-    assert(token_par.numbers.size() == 0);
+    assert(numbers.size() == 0);
+    assert(words[0] == "!");
 }
 
 int main()
@@ -151,10 +167,6 @@ int main()
 
     std::cout << "Test PartSetFunctionsTest:"<<std::endl;
     PartSetFunctionsTest();
-    std::cout <<std::endl;
-
-    std::cout << "Test CallWithoutSetTest:"<<std::endl;
-    CallWithoutSetTest();
     std::cout <<std::endl;
 
     std::cout << "Test EmptyWordTest:"<<std::endl;
