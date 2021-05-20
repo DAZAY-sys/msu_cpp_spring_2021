@@ -1,5 +1,59 @@
 #include "serializer.hpp"
 
+template <typename T>
+struct DataOneType {
+    T a;
+
+    template <class Serializer>
+    Error serialize(Serializer& serializer)
+    {
+        return serializer(a);
+    }
+
+    template <class Deserializer>
+    Error deserialize(Deserializer& deserializer)
+    {
+        return deserializer(a);
+    }
+};
+
+struct Data3
+{
+    std::string a;
+    bool b;
+    uint64_t c;
+
+    template <class Serializer>
+    Error serialize(Serializer& serializer)
+    {
+        return serializer(a, b, c);
+    }
+
+    template <class Deserializer>
+    Error deserialize(Deserializer& deserializer)
+    {
+        return deserializer(a, b, c);
+    }
+};
+
+struct Data2
+{
+    uint64_t a;
+    bool b;
+
+    template <class Serializer>
+    Error serialize(Serializer& serializer)
+    {
+        return serializer(a, b);
+    }
+
+    template <class Deserializer>
+    Error deserialize(Deserializer& deserializer)
+    {
+        return deserializer(a, b);
+    }
+};
+
 template <class Serializer>
 Error Data::serialize(Serializer& serializer)
 {
@@ -110,19 +164,15 @@ Error Deserializer::process(bool& value)
     {
         value = true;
         if (string_in.length() != 0)
-        {
             string_in += Separator;
-            string_in += text;
-        }
+        string_in += text;
     }
     else if (text == "false")
     {
         value = false;
         if (string_in.length() != 0)
-        {
             string_in += Separator;
-            string_in += text;
-        }
+        string_in += text;
     }
     else
         return Error::CorruptedArchive;
@@ -134,14 +184,24 @@ Error Deserializer::process(uint64_t& value)
 {
     std::string text;
     in_ >> text;
+    uint64_t number;
 
-    if (text == "")
+    bool dig_check = (text.find_first_not_of("0123456789") == std::string::npos);
+    if (text == "" or dig_check == false)
         return Error::CorruptedArchive;
 
     if (string_in.length() != 0)
         string_in += Separator;
     string_in += text;
 
-    value = std::stoull(text);
+    try
+    {
+        number = std::stoull(text);
+    }
+    catch(std::out_of_range)
+    {
+        return Error::CorruptedArchive;
+    }
+    value = number;
     return Error::NoError;
 }

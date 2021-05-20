@@ -2,43 +2,6 @@
 #include <sstream>
 #include "serializer.hpp"
 
-struct Data2
-{
-    std::string a;
-    bool b;
-    uint64_t c;
-
-    template <class Serializer>
-    Error serialize(Serializer& serializer)
-    {
-        return serializer(a, b, c);
-    }
-
-    template <class Deserializer>
-    Error deserialize(Deserializer& deserializer)
-    {
-        return deserializer(a, b, c);
-    }
-};
-
-struct Data3
-{
-    uint64_t a;
-    bool b;
-
-    template <class Serializer>
-    Error serialize(Serializer& serializer)
-    {
-        return serializer(a, b);
-    }
-
-    template <class Deserializer>
-    Error deserialize(Deserializer& deserializer)
-    {
-        return deserializer(a, b);
-    }
-};
-
 void DefaultTest()
 {
     Data x { 1, true, 2 }, y { 0, false, 0 };
@@ -63,7 +26,7 @@ void DefaultTest()
 
 void DefaultTestTwoDim()
 {
-    Data3 x {18446744073709551615ULL, true}, y {0, false};
+    Data2 x {18446744073709551615ULL, true}, y {0, false};
 
     std::stringstream stream;
     Serializer serializer(stream);
@@ -84,7 +47,7 @@ void DefaultTestTwoDim()
 
 void BoolType()
 {
-    Data3 x {0, 1}, y {0, false};
+    Data2 x {0, 1}, y {0, false};
 
     std::stringstream stream;
     Serializer serializer(stream);
@@ -106,7 +69,7 @@ void BoolType()
 void ErrorTest()
 {
     Data x {1, true, 2};
-    Data2 y {"str", false, 5};
+    Data3 y {"str", false, 5};
     std::stringstream stream;
 
     Serializer serializer(stream);
@@ -125,7 +88,7 @@ void ErrorTest()
 void WrongDimensionMore()
 {
     Data x {1, true, 2};
-    Data3 y {0, false};
+    Data2 y {0, false};
     std::stringstream stream;
 
     Serializer serializer(stream);
@@ -146,7 +109,7 @@ void WrongDimensionMore()
 
 void WrongDimensionLess()
 {
-    Data3 x {0, false};
+    Data2 x {0, false};
     Data y {1, true, 2};
 
     std::stringstream stream;
@@ -184,6 +147,101 @@ void ReadFromEmptyStream()
     assert(y.c == 1);
 }
 
+void TestOneTypeBool()
+{
+    DataOneType<bool> x {true};
+    DataOneType<bool> y {false};
+    std::stringstream stream;
+
+    Serializer serializer(stream);
+    const Error err_s = serializer.save(x);
+
+    assert(err_s == Error::NoError);
+    assert(serializer.string_out == "true");
+
+    Deserializer deserializer(stream);
+    const Error err_d = deserializer.load(y);
+
+    assert(err_d == Error::NoError);
+    assert(deserializer.string_in == "true");
+
+    assert(y.a == true);
+}
+
+void TestOneTypeInt()
+{
+    DataOneType<uint64_t> x {145};
+    DataOneType<uint64_t> y {12};
+    std::stringstream stream;
+
+    Serializer serializer(stream);
+    const Error err_s = serializer.save(x);
+
+    assert(err_s == Error::NoError);
+    assert(serializer.string_out == "145");
+
+    Deserializer deserializer(stream);
+    const Error err_d = deserializer.load(y);
+
+    assert(err_d == Error::NoError);
+    assert(deserializer.string_in == "145");
+
+    assert(y.a == 145);
+}
+
+void DeserializerTestInt()
+{
+    DataOneType<uint64_t> y {12};
+    std::stringstream stream;
+
+    stream << "true";
+    Deserializer deserializer1(stream);
+    const Error err1 = deserializer1.load(y);
+    assert(err1 == Error::CorruptedArchive);
+
+    stream.str("");
+
+    stream << "123qwerty";
+    Deserializer deserializer2(stream);
+    const Error err2 = deserializer2.load(y);
+    assert(err2 == Error::CorruptedArchive);
+
+    stream.str("");
+
+    stream << "18446744073709551616";
+    Deserializer deserializer3(stream);
+    const Error err3 = deserializer3.load(y);
+    assert(err3 == Error::CorruptedArchive);
+
+    stream.str("");
+
+    stream << "18446744073709551615";
+    Deserializer deserializer4(stream);
+    const Error err4 = deserializer4.load(y);
+    assert(err4 == Error::NoError);
+    assert(deserializer4.string_in == "18446744073709551615");
+    assert(y.a == 18446744073709551615ULL);
+}
+
+void DeserializerTestBool()
+{
+    DataOneType<bool> y {true};
+    std::stringstream stream;
+
+    stream << "0";
+    Deserializer deserializer1(stream);
+    const Error err1 = deserializer1.load(y);
+    assert(err1 == Error::CorruptedArchive);
+
+    stream.str("");
+
+    stream << "1";
+    Deserializer deserializer2(stream);
+    const Error err2 = deserializer2.load(y);
+    assert(err2 == Error::CorruptedArchive);
+}
+
+
 int main()
 {
     DefaultTest();
@@ -193,8 +251,11 @@ int main()
     WrongDimensionMore();
     WrongDimensionLess();
     ReadFromEmptyStream();
+    TestOneTypeBool();
+    TestOneTypeInt();
+    DeserializerTestInt();
+    DeserializerTestBool();
 
     std::cout << "SUCCESS\n";
-
     return 0;
 }
