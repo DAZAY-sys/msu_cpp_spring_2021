@@ -1,5 +1,5 @@
 CC=g++
-FLAGS=-std=c++17 -Wall -Werror -Wextra -Wno-unused-variable
+FLAGS=-std=c++17 -Wall -Werror -Wextra -Wno-unused-variable -fsanitize=address
 
 all: main
 
