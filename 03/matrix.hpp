@@ -8,9 +8,8 @@ class Matrix
     {
     private:
         size_t col_num;
-
     public:
-        int32_t *data;
+        int32_t *data = nullptr;
         Proxy(size_t b = 0);
         ~Proxy();
         int32_t& operator[](size_t j);
@@ -32,7 +31,5 @@ public:
     friend bool operator !=(Matrix &m1, Matrix &m2);
 private:
     size_t row_number, column_number;
-    Proxy *rows;
+    Proxy *rows = nullptr;
 };
-
-

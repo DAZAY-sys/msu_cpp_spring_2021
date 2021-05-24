@@ -20,6 +20,12 @@ void Matrix::Proxy::operator = (Proxy p)
 {
     col_num = p.col_num;
 
+    if(data)
+    {
+        delete [] data;
+        data = nullptr;
+    }
+
     data = new int32_t[p.col_num];
     for (size_t j = 0; j < p.col_num; j++)
     {
@@ -33,6 +39,12 @@ Matrix::Matrix(size_t a /*= 0*/, size_t b /* = 0*/)
     this->column_number = b;
 
     try {
+        if (rows)
+        {
+            delete [] rows;
+            rows = nullptr;
+        }
+
         rows = new Proxy[a];
 
         for (size_t k = 0; k < a; k++)
@@ -45,14 +57,20 @@ Matrix::Matrix(size_t a /*= 0*/, size_t b /* = 0*/)
 
 Matrix::~Matrix()
 {
-    delete [] this->rows;
-//    this->rows = 0;
+    if (rows)
+    {
+        delete [] rows;
+        rows = nullptr;
+    }
 }
 
 Matrix::Proxy::~Proxy()
 {
-    delete [] this->data;
-//    this->data = 0;
+    if (data)
+    {
+        delete [] data;
+        data = nullptr;
+    }
 }
 
 size_t Matrix::getRows() const

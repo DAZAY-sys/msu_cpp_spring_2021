@@ -5,6 +5,7 @@ void DefaultTest()
 {
     Matrix m(2, 7);
     std::cout << m;
+
     assert(m.getRows() == 2);
     assert(m.getColumns() == 7);
 }
@@ -66,6 +67,7 @@ void BigOperationTest()
 void WrongOperationDimensionTest()
 {
     Matrix m1(2, 4), m2(1, 3);
+
     try{
         Matrix sum = m1 + m2;
     }
