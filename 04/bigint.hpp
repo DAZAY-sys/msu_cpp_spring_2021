@@ -37,7 +37,7 @@ private:
     size_t arrSize;
     int32_t *arr;
     static const size_t SIZE = 9;
-    static const int64_t MAXSIZE = pow(10, SIZE);
+    static const int MAXSIZE = 1000000000;
 };
 
 
