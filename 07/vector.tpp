@@ -13,7 +13,7 @@ void Allocator<T>::deallocate(T* ptr, size_t count){
 template<class T>
 template<class... Args>
 void Allocator<T>::construct(T* p, Args&&... args) {
-    new(p) T(std::forward<Args>(args)...);
+    p = new(p) T(std::forward<Args>(args)...);
 }
 
 template<class T>

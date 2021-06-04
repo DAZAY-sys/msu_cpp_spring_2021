@@ -1,6 +1,19 @@
 #pragma once
 #include <iostream>
 
+struct MyStruct{
+    int _number;
+    std::string _word;
+
+MyStruct(int number = 0, std::string word = "")
+    : _number(number), _word(word) {}
+
+MyStruct(const MyStruct& other): _number(other._number),
+_word(other._word){}
+
+MyStruct& operator=(const MyStruct& other) = default;
+};
+
 template<class T>
 class Allocator
 {

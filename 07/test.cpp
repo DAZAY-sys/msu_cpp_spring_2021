@@ -38,7 +38,13 @@ void PointerTest()
     assert (*ptr1 == 1);
     ++ptr1;
     assert(*ptr1 == 2);
+    ++ptr1;
+    assert(*ptr1 == 3 and ptr1 == v.end());
     assert (*ptr2 == 3);
+    --ptr2;
+    assert(*ptr2 == 2);
+    --ptr2;
+    assert(*ptr2 == 1 and ptr2 == v.begin());
 }
 
 void ReverseTest()
@@ -87,11 +93,13 @@ void ResizeTest()
 
 void EmplaceTest()
 {
-    MyVector<int> v;
-    v.push_back(134);
-    v.emplace_back(22);
+    MyVector<MyStruct> v;
+    MyStruct a = {1, "one"};
+    v.push_back(a);
+    v.emplace_back(2, "two");
 
-    assert(v[0] == 134 and v[1] == 22);
+    assert(v[0]._number == 1 and v[0]._word == "one");
+    assert(v[1]._number == 2 and v[1]._word == "two");
     assert(v.size() == 2);
 }
 
